@@ -28,13 +28,13 @@ export const inputSchema = {
 
 export async function handler(
   args: {
-    slotId?: string;
-    serviceId?: string;
-    resourceId?: string;
-    startTime?: string;
-    endTime?: string;
-    metadata?: Record<string, unknown>;
-    idempotencyKey?: string;
+    slotId?: string | undefined;
+    serviceId?: string | undefined;
+    resourceId?: string | undefined;
+    startTime?: string | undefined;
+    endTime?: string | undefined;
+    metadata?: Record<string, unknown> | undefined;
+    idempotencyKey?: string | undefined;
   },
   client: FloydClient,
   apiKey: string,

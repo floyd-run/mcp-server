@@ -69,13 +69,11 @@ describe("floyd_hold_booking", () => {
 
     expect(result.isError).toBeUndefined();
     expect(result.structuredContent).toBeDefined();
-    const booking = (result.structuredContent as Record<string, unknown>).booking as Record<
-      string,
-      unknown
-    >;
-    expect(booking.bookingId).toBe("bkg_01abc");
-    expect(booking.status).toBe("hold");
-    expect(booking.resourceName).toBe("Dr. Smith");
+    const data = result.structuredContent as Record<string, unknown>;
+    const booking = data["booking"] as Record<string, unknown>;
+    expect(booking["bookingId"]).toBe("bkg_01abc");
+    expect(booking["status"]).toBe("hold");
+    expect(booking["resourceName"]).toBe("Dr. Smith");
 
     expect(client.createBooking).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -112,7 +110,7 @@ describe("floyd_hold_booking", () => {
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
-    expect(structured.code).toBe("invalid_input");
+    expect(structured["code"]).toBe("invalid_input");
   });
 
   it("returns error when explicit fields are incomplete", async () => {
@@ -122,7 +120,7 @@ describe("floyd_hold_booking", () => {
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
-    expect(structured.code).toBe("invalid_input");
+    expect(structured["code"]).toBe("invalid_input");
   });
 
   it("maps Floyd API error to MCP error", async () => {
@@ -147,6 +145,6 @@ describe("floyd_hold_booking", () => {
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
-    expect(structured.code).toBe("slot_unavailable");
+    expect(structured["code"]).toBe("slot_unavailable");
   });
 });

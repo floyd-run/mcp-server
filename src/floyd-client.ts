@@ -43,12 +43,15 @@ export class FloydClient {
     if (body) {
       reqHeaders["Content-Type"] = "application/json";
     }
-    const res = await fetch(url, {
+    const init: RequestInit = {
       method,
       headers: reqHeaders,
-      body: body ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(this.timeoutMs),
-    });
+    };
+    if (body) {
+      init.body = JSON.stringify(body);
+    }
+    const res = await fetch(url, init);
 
     if (!res.ok) {
       let errorBody: FloydErrorBody | null = null;
@@ -81,8 +84,8 @@ export class FloydClient {
     resourceId: string;
     startTime: string;
     endTime: string;
-    metadata?: Record<string, unknown>;
-    idempotencyKey?: string;
+    metadata?: Record<string, unknown> | undefined;
+    idempotencyKey?: string | undefined;
   }): Promise<FloydBookingResponse> {
     const headers: Record<string, string> = {};
     if (params.idempotencyKey) {

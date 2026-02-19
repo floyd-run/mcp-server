@@ -13,7 +13,7 @@ export type Config = z.infer<typeof configSchema>;
 
 export function loadConfig(): Config {
   return configSchema.parse({
-    floydBaseUrl: process.env.FLOYD_BASE_URL ?? undefined,
-    port: process.env.PORT ?? undefined,
+    floydBaseUrl: process.env["FLOYD_BASE_URL"] ?? undefined,
+    port: process.env["PORT"] ?? undefined,
   });
 }

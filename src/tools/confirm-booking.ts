@@ -23,7 +23,7 @@ export async function handler(
   args: {
     bookingId: string;
     userConfirmed: boolean;
-    idempotencyKey?: string;
+    idempotencyKey?: string | undefined;
   },
   client: FloydClient,
 ): Promise<CallToolResult> {

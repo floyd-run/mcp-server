@@ -17,8 +17,8 @@ export const inputSchema = {
 export async function handler(
   args: {
     bookingId: string;
-    reason?: string;
-    idempotencyKey?: string;
+    reason?: string | undefined;
+    idempotencyKey?: string | undefined;
   },
   client: FloydClient,
 ): Promise<CallToolResult> {

@@ -55,12 +55,12 @@ describe("floyd_get_booking", () => {
 
     expect(result.isError).toBeUndefined();
     const data = result.structuredContent as Record<string, unknown>;
-    const booking = data.booking as Record<string, unknown>;
-    expect(booking.bookingId).toBe("bkg_01abc");
-    expect(booking.status).toBe("confirmed");
-    expect(booking.resourceName).toBe("Dr. Smith");
-    expect(booking.metadata).toEqual({ customerName: "Jane Doe" });
-    expect(data.allocations).toBeUndefined();
+    const booking = data["booking"] as Record<string, unknown>;
+    expect(booking["bookingId"]).toBe("bkg_01abc");
+    expect(booking["status"]).toBe("confirmed");
+    expect(booking["resourceName"]).toBe("Dr. Smith");
+    expect(booking["metadata"]).toEqual({ customerName: "Jane Doe" });
+    expect(data["allocations"]).toBeUndefined();
   });
 
   it("includes allocations when requested", async () => {
@@ -70,14 +70,14 @@ describe("floyd_get_booking", () => {
 
     expect(result.isError).toBeUndefined();
     const data = result.structuredContent as Record<string, unknown>;
-    expect(data.allocations).toBeDefined();
+    expect(data["allocations"]).toBeDefined();
 
-    const allocations = data.allocations as Array<Record<string, unknown>>;
+    const allocations = data["allocations"] as Array<Record<string, unknown>>;
     expect(allocations).toHaveLength(1);
-    expect(allocations[0]!.allocationId).toBe("alc_01jkl");
-    expect(allocations[0]!.resourceId).toBe("rsc_01mno");
-    expect(allocations[0]!.bufferBeforeMs).toBe(300000);
-    expect(allocations[0]!.bufferAfterMs).toBe(600000);
+    expect(allocations[0]!["allocationId"]).toBe("alc_01jkl");
+    expect(allocations[0]!["resourceId"]).toBe("rsc_01mno");
+    expect(allocations[0]!["bufferBeforeMs"]).toBe(300000);
+    expect(allocations[0]!["bufferAfterMs"]).toBe(600000);
   });
 
   it("maps 404 error to not_found", async () => {
@@ -93,7 +93,7 @@ describe("floyd_get_booking", () => {
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
-    expect(structured.code).toBe("not_found");
+    expect(structured["code"]).toBe("not_found");
   });
 
   it("handles network errors gracefully", async () => {
@@ -105,7 +105,7 @@ describe("floyd_get_booking", () => {
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
-    expect(structured.code).toBe("upstream_error");
+    expect(structured["code"]).toBe("upstream_error");
   });
 
   it("handles missing resource gracefully", async () => {
@@ -116,10 +116,8 @@ describe("floyd_get_booking", () => {
     const result = await handler({ bookingId: "bkg_01abc", includeAllocations: false }, client);
 
     expect(result.isError).toBeUndefined();
-    const booking = (result.structuredContent as Record<string, unknown>).booking as Record<
-      string,
-      unknown
-    >;
-    expect(booking.resourceName).toBeNull();
+    const data = result.structuredContent as Record<string, unknown>;
+    const booking = data["booking"] as Record<string, unknown>;
+    expect(booking["resourceName"]).toBeNull();
   });
 });

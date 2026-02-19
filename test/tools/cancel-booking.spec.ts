@@ -54,13 +54,11 @@ describe("floyd_cancel_booking", () => {
     const result = await handler({ bookingId: "bkg_01abc" }, client);
 
     expect(result.isError).toBeUndefined();
-    const booking = (result.structuredContent as Record<string, unknown>).booking as Record<
-      string,
-      unknown
-    >;
-    expect(booking.bookingId).toBe("bkg_01abc");
-    expect(booking.status).toBe("canceled");
-    expect(booking.resourceName).toBe("Dr. Smith");
+    const data = result.structuredContent as Record<string, unknown>;
+    const booking = data["booking"] as Record<string, unknown>;
+    expect(booking["bookingId"]).toBe("bkg_01abc");
+    expect(booking["status"]).toBe("canceled");
+    expect(booking["resourceName"]).toBe("Dr. Smith");
     expect(client.cancelBooking).toHaveBeenCalledWith("bkg_01abc", undefined);
   });
 
@@ -95,7 +93,7 @@ describe("floyd_cancel_booking", () => {
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
-    expect(structured.code).toBe("not_found");
+    expect(structured["code"]).toBe("not_found");
   });
 
   it("handles network errors gracefully", async () => {
@@ -107,6 +105,6 @@ describe("floyd_cancel_booking", () => {
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
-    expect(structured.code).toBe("upstream_error");
+    expect(structured["code"]).toBe("upstream_error");
   });
 });

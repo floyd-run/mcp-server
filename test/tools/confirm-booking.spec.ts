@@ -54,12 +54,10 @@ describe("floyd_confirm_booking", () => {
     const result = await handler({ bookingId: "bkg_01abc", userConfirmed: true }, client);
 
     expect(result.isError).toBeUndefined();
-    const booking = (result.structuredContent as Record<string, unknown>).booking as Record<
-      string,
-      unknown
-    >;
-    expect(booking.status).toBe("confirmed");
-    expect(booking.expiresAt).toBeNull();
+    const data = result.structuredContent as Record<string, unknown>;
+    const booking = data["booking"] as Record<string, unknown>;
+    expect(booking["status"]).toBe("confirmed");
+    expect(booking["expiresAt"]).toBeNull();
     expect(client.confirmBooking).toHaveBeenCalledWith("bkg_01abc", undefined);
   });
 
@@ -70,7 +68,7 @@ describe("floyd_confirm_booking", () => {
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
-    expect(structured.code).toBe("user_confirmation_required");
+    expect(structured["code"]).toBe("user_confirmation_required");
     expect(client.confirmBooking).not.toHaveBeenCalled();
   });
 
@@ -105,6 +103,6 @@ describe("floyd_confirm_booking", () => {
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
-    expect(structured.code).toBe("hold_expired");
+    expect(structured["code"]).toBe("hold_expired");
   });
 });
