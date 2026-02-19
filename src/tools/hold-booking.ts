@@ -1,9 +1,9 @@
 import { z } from "zod";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { FloydClient } from "../floyd-client.js";
-import { verify } from "../slot-id.js";
-import { formatBooking, success, error } from "../format.js";
-import { handleToolError } from "../errors.js";
+import type { FloydClient } from "../floyd-client";
+import { verify } from "../slot-id";
+import { formatBooking, success, error } from "../format";
+import { handleToolError } from "../errors";
 
 export const name = "floyd_hold_booking";
 
@@ -14,33 +14,16 @@ export const inputSchema = {
   slotId: z
     .string()
     .optional()
-    .describe(
-      "Signed token from floyd_get_available_slots. Preferred over explicit fields.",
-    ),
-  serviceId: z
-    .string()
-    .optional()
-    .describe("Required if no slotId."),
-  resourceId: z
-    .string()
-    .optional()
-    .describe("Required if no slotId."),
-  startTime: z
-    .string()
-    .optional()
-    .describe("ISO 8601 UTC. Required if no slotId."),
-  endTime: z
-    .string()
-    .optional()
-    .describe("ISO 8601 UTC. Required if no slotId."),
+    .describe("Signed token from floyd_get_available_slots. Preferred over explicit fields."),
+  serviceId: z.string().optional().describe("Required if no slotId."),
+  resourceId: z.string().optional().describe("Required if no slotId."),
+  startTime: z.string().optional().describe("ISO 8601 UTC. Required if no slotId."),
+  endTime: z.string().optional().describe("ISO 8601 UTC. Required if no slotId."),
   metadata: z
     .record(z.unknown())
     .optional()
     .describe("Optional context (customer name, phone, notes)."),
-  idempotencyKey: z
-    .string()
-    .optional()
-    .describe("Forwarded as Idempotency-Key header."),
+  idempotencyKey: z.string().optional().describe("Forwarded as Idempotency-Key header."),
 };
 
 export async function handler(

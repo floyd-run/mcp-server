@@ -3,20 +3,20 @@ import type {
   FloydBookingResponse,
   FloydResourceResponse,
   FloydErrorBody,
-} from "./types.js";
+} from "./types";
 
 export class FloydApiError extends Error {
   constructor(
     public readonly status: number,
     public readonly body: FloydErrorBody | null,
   ) {
-    const code = body?.error?.code ?? "unknown";
+    const code = body?.error.code ?? "unknown";
     super(`Floyd API ${status}: ${code}`);
     this.name = "FloydApiError";
   }
 
   get code(): string {
-    return this.body?.error?.code ?? "unknown";
+    return this.body?.error.code ?? "unknown";
   }
 }
 
@@ -69,11 +69,11 @@ export class FloydClient {
     endTime: string,
     durationMs: number,
   ): Promise<FloydSlotsResponse> {
-    return this.request(
-      "POST",
-      `/services/${serviceId}/availability/slots`,
-      { startTime, endTime, durationMs },
-    );
+    return this.request("POST", `/services/${serviceId}/availability/slots`, {
+      startTime,
+      endTime,
+      durationMs,
+    });
   }
 
   async createBooking(params: {
@@ -103,36 +103,20 @@ export class FloydClient {
     );
   }
 
-  async confirmBooking(
-    bookingId: string,
-    idempotencyKey?: string,
-  ): Promise<FloydBookingResponse> {
+  async confirmBooking(bookingId: string, idempotencyKey?: string): Promise<FloydBookingResponse> {
     const headers: Record<string, string> = {};
     if (idempotencyKey) {
       headers["Idempotency-Key"] = idempotencyKey;
     }
-    return this.request(
-      "POST",
-      `/bookings/${bookingId}/confirm`,
-      undefined,
-      headers,
-    );
+    return this.request("POST", `/bookings/${bookingId}/confirm`, undefined, headers);
   }
 
-  async cancelBooking(
-    bookingId: string,
-    idempotencyKey?: string,
-  ): Promise<FloydBookingResponse> {
+  async cancelBooking(bookingId: string, idempotencyKey?: string): Promise<FloydBookingResponse> {
     const headers: Record<string, string> = {};
     if (idempotencyKey) {
       headers["Idempotency-Key"] = idempotencyKey;
     }
-    return this.request(
-      "POST",
-      `/bookings/${bookingId}/cancel`,
-      undefined,
-      headers,
-    );
+    return this.request("POST", `/bookings/${bookingId}/cancel`, undefined, headers);
   }
 
   async getBooking(bookingId: string): Promise<FloydBookingResponse> {

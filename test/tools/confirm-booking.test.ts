@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
-import { handler } from "../../src/tools/confirm-booking.js";
-import { FloydClient, FloydApiError } from "../../src/floyd-client.js";
-import type { FloydBookingResponse, FloydResourceResponse } from "../../src/types.js";
+import { handler } from "../../src/tools/confirm-booking";
+import { FloydClient, FloydApiError } from "../../src/floyd-client";
+import type { FloydBookingResponse, FloydResourceResponse } from "../../src/types";
 
 function mockClient(overrides: Partial<FloydClient> = {}): FloydClient {
   const bookingResponse: FloydBookingResponse = {
@@ -51,13 +51,13 @@ describe("floyd_confirm_booking", () => {
   it("confirms a booking when userConfirmed is true", async () => {
     const client = mockClient();
 
-    const result = await handler(
-      { bookingId: "bkg_01abc", userConfirmed: true },
-      client,
-    );
+    const result = await handler({ bookingId: "bkg_01abc", userConfirmed: true }, client);
 
     expect(result.isError).toBeUndefined();
-    const booking = (result.structuredContent as Record<string, unknown>).booking as Record<string, unknown>;
+    const booking = (result.structuredContent as Record<string, unknown>).booking as Record<
+      string,
+      unknown
+    >;
     expect(booking.status).toBe("confirmed");
     expect(booking.expiresAt).toBeNull();
     expect(client.confirmBooking).toHaveBeenCalledWith("bkg_01abc", undefined);
@@ -66,10 +66,7 @@ describe("floyd_confirm_booking", () => {
   it("returns error when userConfirmed is false", async () => {
     const client = mockClient();
 
-    const result = await handler(
-      { bookingId: "bkg_01abc", userConfirmed: false },
-      client,
-    );
+    const result = await handler({ bookingId: "bkg_01abc", userConfirmed: false }, client);
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
@@ -104,10 +101,7 @@ describe("floyd_confirm_booking", () => {
       ),
     });
 
-    const result = await handler(
-      { bookingId: "bkg_01abc", userConfirmed: true },
-      client,
-    );
+    const result = await handler({ bookingId: "bkg_01abc", userConfirmed: true }, client);
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;

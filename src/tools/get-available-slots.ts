@@ -1,24 +1,18 @@
 import { z } from "zod";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { FloydClient } from "../floyd-client.js";
-import type { FloydResource, McpSlot } from "../types.js";
-import { sign } from "../slot-id.js";
-import { toLocalTime, success } from "../format.js";
-import { handleToolError } from "../errors.js";
+import type { FloydClient } from "../floyd-client";
+import type { FloydResource, McpSlot } from "../types";
+import { sign } from "../slot-id";
+import { toLocalTime, success } from "../format";
+import { handleToolError } from "../errors";
 
 export const name = "floyd_get_available_slots";
 
-export const description =
-  "Check available appointment times for a service.";
+export const description = "Check available appointment times for a service.";
 
 export const inputSchema = {
-  serviceId: z
-    .string()
-    .describe("The service to check availability for."),
-  startTime: z
-    .string()
-    .datetime()
-    .describe("ISO 8601 UTC. Start of the search range."),
+  serviceId: z.string().describe("The service to check availability for."),
+  startTime: z.string().datetime().describe("ISO 8601 UTC. Start of the search range."),
   endTime: z
     .string()
     .datetime()
@@ -29,13 +23,7 @@ export const inputSchema = {
     .min(1)
     .max(1440)
     .describe("Desired appointment length in minutes."),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .default(10)
-    .describe("Max slots to return. Default 10."),
+  limit: z.number().int().min(1).max(50).default(10).describe("Max slots to return. Default 10."),
 };
 
 export async function handler(
@@ -59,9 +47,7 @@ export async function handler(
     );
 
     // Collect unique resource IDs and fetch their details
-    const resourceIds = [
-      ...new Set(slotsResponse.data.map((r) => r.resourceId)),
-    ];
+    const resourceIds = [...new Set(slotsResponse.data.map((r) => r.resourceId))];
     const resourceMap = new Map<string, FloydResource>();
 
     await Promise.all(

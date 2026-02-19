@@ -1,11 +1,12 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { loadConfig } from "./config.js";
-import { createServer } from "./server.js";
+import { loadConfig } from "./config";
+import { createServer } from "./server";
 
 const config = loadConfig();
 const isStdio = process.argv.includes("--stdio");
@@ -37,9 +38,9 @@ if (isStdio) {
     await server.connect(transport);
 
     const apiKey = extractApiKey(c.req.raw);
-    return transport.handleRequest(c.req.raw, apiKey
-      ? { authInfo: { token: apiKey, clientId: "", scopes: [] } }
-      : undefined,
+    return transport.handleRequest(
+      c.req.raw,
+      apiKey ? { authInfo: { token: apiKey, clientId: "", scopes: [] } } : undefined,
     );
   });
 
@@ -48,9 +49,7 @@ if (isStdio) {
   app.get("/health", (c) => c.json({ ok: true }));
 
   const httpServer = serve({ fetch: app.fetch, port: config.port }, () => {
-    console.error(
-      `[floyd-mcp] Streamable HTTP server listening on port ${config.port}`,
-    );
+    console.error(`[floyd-mcp] Streamable HTTP server listening on port ${config.port}`);
     console.error(`[floyd-mcp] Endpoint: POST http://localhost:${config.port}/mcp`);
   });
 

@@ -15,7 +15,7 @@ export type Config = z.infer<typeof configSchema>;
 export function loadConfig(): Config {
   return configSchema.parse({
     floydApiKey: process.env.FLOYD_API_KEY,
-    floydBaseUrl: process.env.FLOYD_BASE_URL || undefined,
-    port: process.env.PORT || undefined,
+    floydBaseUrl: process.env.FLOYD_BASE_URL ?? undefined,
+    port: process.env.PORT ?? undefined,
   });
 }

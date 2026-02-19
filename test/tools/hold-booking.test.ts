@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
-import { handler } from "../../src/tools/hold-booking.js";
-import { sign } from "../../src/slot-id.js";
-import { FloydClient, FloydApiError } from "../../src/floyd-client.js";
-import type { FloydBookingResponse, FloydResourceResponse } from "../../src/types.js";
+import { handler } from "../../src/tools/hold-booking";
+import { sign } from "../../src/slot-id";
+import { FloydClient, FloydApiError } from "../../src/floyd-client";
+import type { FloydBookingResponse, FloydResourceResponse } from "../../src/types";
 
 const API_KEY = "floyd_live_test_key";
 
@@ -69,7 +69,10 @@ describe("floyd_hold_booking", () => {
 
     expect(result.isError).toBeUndefined();
     expect(result.structuredContent).toBeDefined();
-    const booking = (result.structuredContent as Record<string, unknown>).booking as Record<string, unknown>;
+    const booking = (result.structuredContent as Record<string, unknown>).booking as Record<
+      string,
+      unknown
+    >;
     expect(booking.bookingId).toBe("bkg_01abc");
     expect(booking.status).toBe("hold");
     expect(booking.resourceName).toBe("Dr. Smith");
@@ -105,11 +108,7 @@ describe("floyd_hold_booking", () => {
   it("returns error for invalid slotId", async () => {
     const client = mockClient();
 
-    const result = await handler(
-      { slotId: "slot_v1.tampered.signature" },
-      client,
-      API_KEY,
-    );
+    const result = await handler({ slotId: "slot_v1.tampered.signature" }, client, API_KEY);
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
@@ -119,11 +118,7 @@ describe("floyd_hold_booking", () => {
   it("returns error when explicit fields are incomplete", async () => {
     const client = mockClient();
 
-    const result = await handler(
-      { serviceId: "svc_01def" },
-      client,
-      API_KEY,
-    );
+    const result = await handler({ serviceId: "svc_01def" }, client, API_KEY);
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;

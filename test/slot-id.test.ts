@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sign, verify, type SlotPayload } from "../src/slot-id.js";
+import { sign, verify, type SlotPayload } from "../src/slot-id";
 
 const API_KEY = "floyd_live_test_abc123";
 

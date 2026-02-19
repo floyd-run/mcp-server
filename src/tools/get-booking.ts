@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { FloydClient } from "../floyd-client.js";
-import { formatBooking, success } from "../format.js";
-import { handleToolError } from "../errors.js";
+import type { FloydClient } from "../floyd-client";
+import { formatBooking, success } from "../format";
+import { handleToolError } from "../errors";
 
 export const name = "floyd_get_booking";
 
@@ -29,7 +29,10 @@ export async function handler(
 
     const resourceId = response.data.allocations[0]?.resourceId;
     const resource = resourceId
-      ? await client.getResource(resourceId).then((r) => r.data).catch(() => null)
+      ? await client
+          .getResource(resourceId)
+          .then((r) => r.data)
+          .catch(() => null)
       : null;
 
     const booking = formatBooking(response.data, resource);

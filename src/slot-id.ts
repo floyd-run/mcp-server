@@ -13,9 +13,7 @@ const PREFIX = "slot_v1";
 const KEY_DERIVATION_LABEL = "floyd-slot-key";
 
 function deriveSecret(apiKey: string): Buffer {
-  return createHmac("sha256", KEY_DERIVATION_LABEL)
-    .update(apiKey)
-    .digest();
+  return createHmac("sha256", KEY_DERIVATION_LABEL).update(apiKey).digest();
 }
 
 function toBase64Url(buf: Buffer): string {
@@ -37,7 +35,9 @@ export function verify(token: string, apiKey: string): SlotPayload | null {
   const parts = token.split(".");
   if (parts.length !== 3 || parts[0] !== PREFIX) return null;
 
-  const [, payloadB64, sigB64] = parts;
+  // Length already validated above
+  const payloadB64 = parts[1]!;
+  const sigB64 = parts[2]!;
   const secret = deriveSecret(apiKey);
   const expected = createHmac("sha256", secret).update(payloadB64).digest();
   const actual = fromBase64Url(sigB64);
@@ -46,9 +46,9 @@ export function verify(token: string, apiKey: string): SlotPayload | null {
   if (!timingSafeEqual(actual, expected)) return null;
 
   try {
-    const payload = JSON.parse(fromBase64Url(payloadB64).toString("utf-8"));
-    if (payload.v !== 1) return null;
-    return payload as SlotPayload;
+    const raw: unknown = JSON.parse(fromBase64Url(payloadB64).toString("utf-8"));
+    if (typeof raw !== "object" || raw === null || !("v" in raw) || raw.v !== 1) return null;
+    return raw as SlotPayload;
   } catch {
     return null;
   }

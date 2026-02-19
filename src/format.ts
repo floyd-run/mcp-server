@@ -1,5 +1,5 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { FloydBooking, FloydResource, McpBooking } from "./types.js";
+import type { FloydAllocation, FloydBooking, FloydResource, McpBooking } from "./types";
 
 export function toLocalTime(utcIso: string, timezone: string): string {
   const date = new Date(utcIso);
@@ -17,8 +17,7 @@ export function toLocalTime(utcIso: string, timezone: string): string {
   });
 
   const parts = formatter.formatToParts(date);
-  const get = (type: string) =>
-    parts.find((p) => p.type === type)?.value ?? "";
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
 
   const yyyy = get("year");
   const mm = get("month");
@@ -31,11 +30,8 @@ export function toLocalTime(utcIso: string, timezone: string): string {
   return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}${offset}`;
 }
 
-export function formatBooking(
-  booking: FloydBooking,
-  resource: FloydResource | null,
-): McpBooking {
-  const alloc = booking.allocations[0];
+export function formatBooking(booking: FloydBooking, resource: FloydResource | null): McpBooking {
+  const alloc: FloydAllocation | undefined = booking.allocations[0];
   const timezone = resource?.timezone ?? "UTC";
   const startTime = alloc?.startTime ?? null;
   const endTime = alloc?.endTime ?? null;
@@ -64,11 +60,7 @@ export function success(data: Record<string, unknown>): CallToolResult {
   };
 }
 
-export function error(
-  code: string,
-  message: string,
-  recoveryHint: string,
-): CallToolResult {
+export function error(code: string, message: string, recoveryHint: string): CallToolResult {
   const data = { error: true, code, message, recoveryHint };
   const text = JSON.stringify(data);
   return {

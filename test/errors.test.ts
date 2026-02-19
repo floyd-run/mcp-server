@@ -1,12 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { mapFloydError } from "../src/errors.js";
-import { FloydApiError } from "../src/floyd-client.js";
+import { mapFloydError } from "../src/errors";
+import { FloydApiError } from "../src/floyd-client";
 
-function makeError(
-  status: number,
-  code: string,
-  message = "test error",
-): FloydApiError {
+function makeError(status: number, code: string, message = "test error"): FloydApiError {
   return new FloydApiError(status, {
     error: { code, message },
   });
@@ -56,17 +52,13 @@ describe("mapFloydError", () => {
   });
 
   it("maps policy.overnight_not_supported to policy_rejected", () => {
-    const result = mapFloydError(
-      makeError(409, "policy.overnight_not_supported"),
-    );
+    const result = mapFloydError(makeError(409, "policy.overnight_not_supported"));
     expect(result.code).toBe("policy_rejected");
     expect(result.recoveryHint).toContain("Overnight");
   });
 
   it("maps booking.invalid_transition to hold_expired", () => {
-    const result = mapFloydError(
-      makeError(409, "booking.invalid_transition"),
-    );
+    const result = mapFloydError(makeError(409, "booking.invalid_transition"));
     expect(result.code).toBe("hold_expired");
   });
 

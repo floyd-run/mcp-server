@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
-import { handler } from "../../src/tools/cancel-booking.js";
-import { FloydClient, FloydApiError } from "../../src/floyd-client.js";
-import type { FloydBookingResponse, FloydResourceResponse } from "../../src/types.js";
+import { handler } from "../../src/tools/cancel-booking";
+import { FloydClient, FloydApiError } from "../../src/floyd-client";
+import type { FloydBookingResponse, FloydResourceResponse } from "../../src/types";
 
 function mockClient(overrides: Partial<FloydClient> = {}): FloydClient {
   const bookingResponse: FloydBookingResponse = {
@@ -54,8 +54,10 @@ describe("floyd_cancel_booking", () => {
     const result = await handler({ bookingId: "bkg_01abc" }, client);
 
     expect(result.isError).toBeUndefined();
-    const booking = (result.structuredContent as Record<string, unknown>)
-      .booking as Record<string, unknown>;
+    const booking = (result.structuredContent as Record<string, unknown>).booking as Record<
+      string,
+      unknown
+    >;
     expect(booking.bookingId).toBe("bkg_01abc");
     expect(booking.status).toBe("canceled");
     expect(booking.resourceName).toBe("Dr. Smith");
@@ -65,10 +67,7 @@ describe("floyd_cancel_booking", () => {
   it("passes idempotencyKey to client", async () => {
     const client = mockClient();
 
-    await handler(
-      { bookingId: "bkg_01abc", idempotencyKey: "idem_456" },
-      client,
-    );
+    await handler({ bookingId: "bkg_01abc", idempotencyKey: "idem_456" }, client);
 
     expect(client.cancelBooking).toHaveBeenCalledWith("bkg_01abc", "idem_456");
   });
@@ -77,14 +76,9 @@ describe("floyd_cancel_booking", () => {
     const client = mockClient();
     const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
 
-    await handler(
-      { bookingId: "bkg_01abc", reason: "user changed mind" },
-      client,
-    );
+    await handler({ bookingId: "bkg_01abc", reason: "user changed mind" }, client);
 
-    expect(infoSpy).toHaveBeenCalledWith(
-      expect.stringContaining("user changed mind"),
-    );
+    expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining("user changed mind"));
     infoSpy.mockRestore();
   });
 
@@ -106,9 +100,7 @@ describe("floyd_cancel_booking", () => {
 
   it("handles network errors gracefully", async () => {
     const client = mockClient({
-      cancelBooking: vi
-        .fn()
-        .mockRejectedValue(new TypeError("fetch failed")),
+      cancelBooking: vi.fn().mockRejectedValue(new TypeError("fetch failed")),
     });
 
     const result = await handler({ bookingId: "bkg_01abc" }, client);

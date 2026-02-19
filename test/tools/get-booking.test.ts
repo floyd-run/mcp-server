@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
-import { handler } from "../../src/tools/get-booking.js";
-import { FloydClient, FloydApiError } from "../../src/floyd-client.js";
-import type { FloydBookingResponse, FloydResourceResponse } from "../../src/types.js";
+import { handler } from "../../src/tools/get-booking";
+import { FloydClient, FloydApiError } from "../../src/floyd-client";
+import type { FloydBookingResponse, FloydResourceResponse } from "../../src/types";
 
 function mockClient(overrides: Partial<FloydClient> = {}): FloydClient {
   const bookingResponse: FloydBookingResponse = {
@@ -51,10 +51,7 @@ describe("floyd_get_booking", () => {
   it("retrieves booking without allocations by default", async () => {
     const client = mockClient();
 
-    const result = await handler(
-      { bookingId: "bkg_01abc", includeAllocations: false },
-      client,
-    );
+    const result = await handler({ bookingId: "bkg_01abc", includeAllocations: false }, client);
 
     expect(result.isError).toBeUndefined();
     const data = result.structuredContent as Record<string, unknown>;
@@ -69,10 +66,7 @@ describe("floyd_get_booking", () => {
   it("includes allocations when requested", async () => {
     const client = mockClient();
 
-    const result = await handler(
-      { bookingId: "bkg_01abc", includeAllocations: true },
-      client,
-    );
+    const result = await handler({ bookingId: "bkg_01abc", includeAllocations: true }, client);
 
     expect(result.isError).toBeUndefined();
     const data = result.structuredContent as Record<string, unknown>;
@@ -80,10 +74,10 @@ describe("floyd_get_booking", () => {
 
     const allocations = data.allocations as Array<Record<string, unknown>>;
     expect(allocations).toHaveLength(1);
-    expect(allocations[0].allocationId).toBe("alc_01jkl");
-    expect(allocations[0].resourceId).toBe("rsc_01mno");
-    expect(allocations[0].bufferBeforeMs).toBe(300000);
-    expect(allocations[0].bufferAfterMs).toBe(600000);
+    expect(allocations[0]!.allocationId).toBe("alc_01jkl");
+    expect(allocations[0]!.resourceId).toBe("rsc_01mno");
+    expect(allocations[0]!.bufferBeforeMs).toBe(300000);
+    expect(allocations[0]!.bufferAfterMs).toBe(600000);
   });
 
   it("maps 404 error to not_found", async () => {
@@ -95,10 +89,7 @@ describe("floyd_get_booking", () => {
       ),
     });
 
-    const result = await handler(
-      { bookingId: "bkg_missing", includeAllocations: false },
-      client,
-    );
+    const result = await handler({ bookingId: "bkg_missing", includeAllocations: false }, client);
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
@@ -107,15 +98,10 @@ describe("floyd_get_booking", () => {
 
   it("handles network errors gracefully", async () => {
     const client = mockClient({
-      getBooking: vi
-        .fn()
-        .mockRejectedValue(new TypeError("fetch failed")),
+      getBooking: vi.fn().mockRejectedValue(new TypeError("fetch failed")),
     });
 
-    const result = await handler(
-      { bookingId: "bkg_01abc", includeAllocations: false },
-      client,
-    );
+    const result = await handler({ bookingId: "bkg_01abc", includeAllocations: false }, client);
 
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
@@ -127,14 +113,13 @@ describe("floyd_get_booking", () => {
       getResource: vi.fn().mockRejectedValue(new Error("not found")),
     });
 
-    const result = await handler(
-      { bookingId: "bkg_01abc", includeAllocations: false },
-      client,
-    );
+    const result = await handler({ bookingId: "bkg_01abc", includeAllocations: false }, client);
 
     expect(result.isError).toBeUndefined();
-    const booking = (result.structuredContent as Record<string, unknown>)
-      .booking as Record<string, unknown>;
+    const booking = (result.structuredContent as Record<string, unknown>).booking as Record<
+      string,
+      unknown
+    >;
     expect(booking.resourceName).toBeNull();
   });
 });

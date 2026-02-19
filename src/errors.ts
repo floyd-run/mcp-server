@@ -1,6 +1,6 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { FloydApiError } from "./floyd-client.js";
-import { error as mcpError } from "./format.js";
+import { FloydApiError } from "./floyd-client";
+import { error as mcpError } from "./format";
 
 export interface McpError {
   code: string;
@@ -10,18 +10,12 @@ export interface McpError {
 
 const POLICY_HINTS: Record<string, string> = {
   "policy.blackout": "That date is blocked. Try a different date.",
-  "policy.closed":
-    "The service is closed at that time. Try during business hours.",
-  "policy.invalid_duration":
-    "That duration isn't available. Check allowed durations.",
-  "policy.misaligned_start":
-    "That start time doesn't align to the scheduling grid.",
-  "policy.lead_time_violation":
-    "Too short notice. Try a time further in the future.",
-  "policy.horizon_exceeded":
-    "Too far in advance. Try a date closer to today.",
-  "policy.overnight_not_supported":
-    "Overnight bookings are not supported.",
+  "policy.closed": "The service is closed at that time. Try during business hours.",
+  "policy.invalid_duration": "That duration isn't available. Check allowed durations.",
+  "policy.misaligned_start": "That start time doesn't align to the scheduling grid.",
+  "policy.lead_time_violation": "Too short notice. Try a time further in the future.",
+  "policy.horizon_exceeded": "Too far in advance. Try a date closer to today.",
+  "policy.overnight_not_supported": "Overnight bookings are not supported.",
 };
 
 export function mapFloydError(err: FloydApiError): McpError {
@@ -51,14 +45,13 @@ export function mapFloydError(err: FloydApiError): McpError {
       return {
         code: "hold_expired",
         message: "The hold has expired.",
-        recoveryHint:
-          "The hold expired. Call floyd_get_available_slots for new options.",
+        recoveryHint: "The hold expired. Call floyd_get_available_slots for new options.",
       };
     }
 
     return {
       code: "conflict",
-      message: err.body?.error?.message ?? "Conflict.",
+      message: err.body?.error.message ?? "Conflict.",
       recoveryHint: "The request conflicts with existing data. Try again.",
     };
   }
@@ -66,8 +59,8 @@ export function mapFloydError(err: FloydApiError): McpError {
   if (err.status === 422) {
     return {
       code: "invalid_input",
-      message: err.body?.error?.message ?? "Invalid input.",
-      recoveryHint: err.body?.error?.message ?? "Check the input and try again.",
+      message: err.body?.error.message ?? "Invalid input.",
+      recoveryHint: err.body?.error.message ?? "Check the input and try again.",
     };
   }
 
@@ -105,7 +98,7 @@ export function mapFloydError(err: FloydApiError): McpError {
 
   return {
     code: "upstream_error",
-    message: err.body?.error?.message ?? "Unexpected error.",
+    message: err.body?.error.message ?? "Unexpected error.",
     recoveryHint: "An unexpected error occurred. Try again.",
   };
 }

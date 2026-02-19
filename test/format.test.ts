@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { toLocalTime, formatBooking, success, error } from "../src/format.js";
-import type { FloydBooking, FloydResource } from "../src/types.js";
+import { toLocalTime, formatBooking, success, error } from "../src/format";
+import type { FloydBooking, FloydResource } from "../src/types";
 
 describe("toLocalTime", () => {
   it("converts UTC to Eastern time with offset", () => {

@@ -1,11 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
-import { handler } from "../../src/tools/get-available-slots.js";
-import { verify } from "../../src/slot-id.js";
-import { FloydClient } from "../../src/floyd-client.js";
-import type {
-  FloydSlotsResponse,
-  FloydResourceResponse,
-} from "../../src/types.js";
+import { handler } from "../../src/tools/get-available-slots";
+import { verify } from "../../src/slot-id";
+import { FloydClient } from "../../src/floyd-client";
+import type { FloydSlotsResponse, FloydResourceResponse } from "../../src/types";
 
 const API_KEY = "floyd_live_test_key";
 
@@ -73,13 +70,15 @@ describe("floyd_get_available_slots", () => {
     );
 
     expect(result.isError).toBeUndefined();
-    const slots = (result.structuredContent as Record<string, unknown>).slots as Array<Record<string, unknown>>;
+    const slots = (result.structuredContent as Record<string, unknown>).slots as Array<
+      Record<string, unknown>
+    >;
 
     // Only 2 available (third is unavailable)
     expect(slots).toHaveLength(2);
 
     // Verify slotId is signed and verifiable
-    const slotId = slots[0].slotId as string;
+    const slotId = slots[0]!.slotId as string;
     expect(slotId).toMatch(/^slot_v1\./);
     const payload = verify(slotId, API_KEY);
     expect(payload).not.toBeNull();
@@ -87,9 +86,9 @@ describe("floyd_get_available_slots", () => {
     expect(payload!.rsc).toBe("rsc_01mno");
 
     // Check local time conversion
-    expect(slots[0].resourceName).toBe("Dr. Smith");
-    expect(slots[0].timezone).toBe("America/New_York");
-    expect(slots[0].startTimeLocal).toContain("2026-03-01T09:00:00");
+    expect(slots[0]!.resourceName).toBe("Dr. Smith");
+    expect(slots[0]!.timezone).toBe("America/New_York");
+    expect(slots[0]!.startTimeLocal).toContain("2026-03-01T09:00:00");
   });
 
   it("respects limit parameter", async () => {
@@ -107,7 +106,9 @@ describe("floyd_get_available_slots", () => {
       API_KEY,
     );
 
-    const slots = (result.structuredContent as Record<string, unknown>).slots as Array<Record<string, unknown>>;
+    const slots = (result.structuredContent as Record<string, unknown>).slots as Array<
+      Record<string, unknown>
+    >;
     expect(slots).toHaveLength(1);
   });
 
@@ -152,7 +153,9 @@ describe("floyd_get_available_slots", () => {
     );
 
     expect(result.isError).toBeUndefined();
-    const slots = (result.structuredContent as Record<string, unknown>).slots as Array<Record<string, unknown>>;
-    expect(slots[0].resourceName).toBeNull();
+    const slots = (result.structuredContent as Record<string, unknown>).slots as Array<
+      Record<string, unknown>
+    >;
+    expect(slots[0]!.resourceName).toBeNull();
   });
 });
