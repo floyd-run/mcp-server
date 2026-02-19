@@ -44,7 +44,7 @@ if (isStdio) {
     );
   });
 
-  app.get("/", (c) => c.body(null, 405));
+  app.get("/", (c) => c.json({ name: "Floyd MCP Server", time: new Date() }));
 
   app.get("/health", (c) => c.json({ ok: true }));
 
