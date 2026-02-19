@@ -87,13 +87,14 @@ describe("floyd_confirm_booking", () => {
     expect(client.confirmBooking).toHaveBeenCalledWith("bkg_01abc", "idem_123");
   });
 
-  it("maps hold_expired error", async () => {
+  it("maps booking.hold_expired error", async () => {
     const client = mockClient({
       confirmBooking: vi.fn().mockRejectedValue(
         new FloydApiError(409, {
           error: {
-            code: "booking.invalid_transition",
-            message: "Cannot confirm",
+            code: "booking.hold_expired",
+            message: "Hold expired",
+            details: { expiresAt: "2026-03-01T14:15:00Z", serverTime: "2026-03-01T14:16:00Z" },
           },
         }),
       ),
@@ -104,5 +105,45 @@ describe("floyd_confirm_booking", () => {
     expect(result.isError).toBe(true);
     const structured = result.structuredContent as Record<string, unknown>;
     expect(structured["code"]).toBe("hold_expired");
+  });
+
+  it("maps booking.invalid_transition with expired status to hold_expired", async () => {
+    const client = mockClient({
+      confirmBooking: vi.fn().mockRejectedValue(
+        new FloydApiError(409, {
+          error: {
+            code: "booking.invalid_transition",
+            message: "Cannot confirm",
+            details: { currentStatus: "expired", requestedStatus: "confirmed" },
+          },
+        }),
+      ),
+    });
+
+    const result = await handler({ bookingId: "bkg_01abc", userConfirmed: true }, client);
+
+    expect(result.isError).toBe(true);
+    const structured = result.structuredContent as Record<string, unknown>;
+    expect(structured["code"]).toBe("hold_expired");
+  });
+
+  it("maps booking.invalid_transition with confirmed status to already_confirmed", async () => {
+    const client = mockClient({
+      confirmBooking: vi.fn().mockRejectedValue(
+        new FloydApiError(409, {
+          error: {
+            code: "booking.invalid_transition",
+            message: "Cannot confirm",
+            details: { currentStatus: "confirmed", requestedStatus: "confirmed" },
+          },
+        }),
+      ),
+    });
+
+    const result = await handler({ bookingId: "bkg_01abc", userConfirmed: true }, client);
+
+    expect(result.isError).toBe(true);
+    const structured = result.structuredContent as Record<string, unknown>;
+    expect(structured["code"]).toBe("already_confirmed");
   });
 });

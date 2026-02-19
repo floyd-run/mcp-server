@@ -31,21 +31,56 @@ export function mapFloydError(err: FloydApiError): McpError {
       };
     }
 
-    const policyHint = POLICY_HINTS[apiCode];
-    if (policyHint) {
+    // Engine returns error.code = "policy.rejected" with the specific reason
+    // in error.details.code (e.g. "policy.blackout", "policy.closed")
+    if (apiCode === "policy.rejected") {
+      const subCode = err.body?.error.details?.code;
+      const hint = subCode ? POLICY_HINTS[subCode] : undefined;
       return {
         code: "policy_rejected",
-        message: policyHint,
-        recoveryHint: policyHint,
+        message: hint ?? "The booking was rejected by the service policy.",
+        recoveryHint:
+          hint ?? "The booking was rejected by the service policy. Try different parameters.",
       };
     }
 
-    // Hold expired (booking status transition conflict)
-    if (apiCode === "booking.invalid_transition") {
+    // Explicit hold expiry (hold's expiresAt has passed)
+    if (apiCode === "booking.hold_expired") {
       return {
         code: "hold_expired",
         message: "The hold has expired.",
         recoveryHint: "The hold expired. Call floyd_get_available_slots for new options.",
+      };
+    }
+
+    // Status transition conflict — differentiate by currentStatus
+    if (apiCode === "booking.invalid_transition") {
+      const currentStatus = err.body?.error.details?.currentStatus;
+      if (currentStatus === "expired") {
+        return {
+          code: "hold_expired",
+          message: "The hold has expired.",
+          recoveryHint: "The hold expired. Call floyd_get_available_slots for new options.",
+        };
+      }
+      if (currentStatus === "confirmed") {
+        return {
+          code: "already_confirmed",
+          message: "This booking is already confirmed.",
+          recoveryHint: "This booking is already confirmed. No further action needed.",
+        };
+      }
+      if (currentStatus === "canceled") {
+        return {
+          code: "already_canceled",
+          message: "This booking was already canceled.",
+          recoveryHint: "This booking was already canceled. Create a new booking if needed.",
+        };
+      }
+      return {
+        code: "invalid_transition",
+        message: err.body?.error.message ?? "Invalid booking status transition.",
+        recoveryHint: "The booking cannot be changed to the requested status.",
       };
     }
 

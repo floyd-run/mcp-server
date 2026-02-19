@@ -17,8 +17,8 @@ export const inputSchema = {
     .describe("Signed token from floyd_get_available_slots. Preferred over explicit fields."),
   serviceId: z.string().optional().describe("Required if no slotId."),
   resourceId: z.string().optional().describe("Required if no slotId."),
-  startTime: z.string().optional().describe("ISO 8601 UTC. Required if no slotId."),
-  endTime: z.string().optional().describe("ISO 8601 UTC. Required if no slotId."),
+  startTime: z.string().datetime().optional().describe("ISO 8601 UTC. Required if no slotId."),
+  endTime: z.string().datetime().optional().describe("ISO 8601 UTC. Required if no slotId."),
   metadata: z
     .record(z.unknown())
     .optional()

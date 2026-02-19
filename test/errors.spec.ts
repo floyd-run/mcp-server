@@ -1,10 +1,16 @@
 import { describe, it, expect } from "vitest";
 import { mapFloydError } from "../src/errors";
 import { FloydApiError } from "../src/floyd-client";
+import type { FloydErrorDetails } from "../src/types";
 
-function makeError(status: number, code: string, message = "test error"): FloydApiError {
+function makeError(
+  status: number,
+  code: string,
+  message = "test error",
+  details?: FloydErrorDetails,
+): FloydApiError {
   return new FloydApiError(status, {
-    error: { code, message },
+    error: { code, message, ...(details ? { details } : {}) },
   });
 }
 
@@ -15,51 +21,123 @@ describe("mapFloydError", () => {
     expect(result.recoveryHint).toContain("different time");
   });
 
-  it("maps policy.blackout to policy_rejected", () => {
-    const result = mapFloydError(makeError(409, "policy.blackout"));
-    expect(result.code).toBe("policy_rejected");
-    expect(result.recoveryHint).toContain("blocked");
+  describe("policy.rejected with sub-codes", () => {
+    it("maps policy.blackout to policy_rejected with specific hint", () => {
+      const result = mapFloydError(
+        makeError(409, "policy.rejected", "Conflict", { code: "policy.blackout" }),
+      );
+      expect(result.code).toBe("policy_rejected");
+      expect(result.message).toContain("blocked");
+    });
+
+    it("maps policy.closed to policy_rejected with specific hint", () => {
+      const result = mapFloydError(
+        makeError(409, "policy.rejected", "Conflict", { code: "policy.closed" }),
+      );
+      expect(result.code).toBe("policy_rejected");
+      expect(result.message).toContain("business hours");
+    });
+
+    it("maps policy.invalid_duration to policy_rejected with specific hint", () => {
+      const result = mapFloydError(
+        makeError(409, "policy.rejected", "Conflict", { code: "policy.invalid_duration" }),
+      );
+      expect(result.code).toBe("policy_rejected");
+      expect(result.message).toContain("duration");
+    });
+
+    it("maps policy.misaligned_start to policy_rejected with specific hint", () => {
+      const result = mapFloydError(
+        makeError(409, "policy.rejected", "Conflict", { code: "policy.misaligned_start" }),
+      );
+      expect(result.code).toBe("policy_rejected");
+      expect(result.message).toContain("grid");
+    });
+
+    it("maps policy.lead_time_violation to policy_rejected with specific hint", () => {
+      const result = mapFloydError(
+        makeError(409, "policy.rejected", "Conflict", { code: "policy.lead_time_violation" }),
+      );
+      expect(result.code).toBe("policy_rejected");
+      expect(result.message).toContain("further in the future");
+    });
+
+    it("maps policy.horizon_exceeded to policy_rejected with specific hint", () => {
+      const result = mapFloydError(
+        makeError(409, "policy.rejected", "Conflict", { code: "policy.horizon_exceeded" }),
+      );
+      expect(result.code).toBe("policy_rejected");
+      expect(result.message).toContain("closer to today");
+    });
+
+    it("maps policy.overnight_not_supported to policy_rejected with specific hint", () => {
+      const result = mapFloydError(
+        makeError(409, "policy.rejected", "Conflict", {
+          code: "policy.overnight_not_supported",
+        }),
+      );
+      expect(result.code).toBe("policy_rejected");
+      expect(result.message).toContain("Overnight");
+    });
+
+    it("uses generic message for unknown policy sub-code", () => {
+      const result = mapFloydError(
+        makeError(409, "policy.rejected", "Conflict", { code: "policy.eval_error" }),
+      );
+      expect(result.code).toBe("policy_rejected");
+      expect(result.message).toContain("rejected by the service policy");
+    });
+
+    it("uses generic message when no details present", () => {
+      const result = mapFloydError(makeError(409, "policy.rejected", "Conflict"));
+      expect(result.code).toBe("policy_rejected");
+      expect(result.message).toContain("rejected by the service policy");
+    });
   });
 
-  it("maps policy.closed to policy_rejected", () => {
-    const result = mapFloydError(makeError(409, "policy.closed"));
-    expect(result.code).toBe("policy_rejected");
-    expect(result.recoveryHint).toContain("business hours");
+  describe("booking.hold_expired", () => {
+    it("maps to hold_expired", () => {
+      const result = mapFloydError(makeError(409, "booking.hold_expired"));
+      expect(result.code).toBe("hold_expired");
+      expect(result.recoveryHint).toContain("floyd_get_available_slots");
+    });
   });
 
-  it("maps policy.invalid_duration to policy_rejected", () => {
-    const result = mapFloydError(makeError(409, "policy.invalid_duration"));
-    expect(result.code).toBe("policy_rejected");
-    expect(result.recoveryHint).toContain("duration");
-  });
+  describe("booking.invalid_transition", () => {
+    it("maps expired status to hold_expired", () => {
+      const result = mapFloydError(
+        makeError(409, "booking.invalid_transition", "Conflict", {
+          currentStatus: "expired",
+          requestedStatus: "confirmed",
+        }),
+      );
+      expect(result.code).toBe("hold_expired");
+    });
 
-  it("maps policy.misaligned_start to policy_rejected", () => {
-    const result = mapFloydError(makeError(409, "policy.misaligned_start"));
-    expect(result.code).toBe("policy_rejected");
-    expect(result.recoveryHint).toContain("grid");
-  });
+    it("maps confirmed status to already_confirmed", () => {
+      const result = mapFloydError(
+        makeError(409, "booking.invalid_transition", "Conflict", {
+          currentStatus: "confirmed",
+          requestedStatus: "confirmed",
+        }),
+      );
+      expect(result.code).toBe("already_confirmed");
+    });
 
-  it("maps policy.lead_time_violation to policy_rejected", () => {
-    const result = mapFloydError(makeError(409, "policy.lead_time_violation"));
-    expect(result.code).toBe("policy_rejected");
-    expect(result.recoveryHint).toContain("further in the future");
-  });
+    it("maps canceled status to already_canceled", () => {
+      const result = mapFloydError(
+        makeError(409, "booking.invalid_transition", "Conflict", {
+          currentStatus: "canceled",
+          requestedStatus: "canceled",
+        }),
+      );
+      expect(result.code).toBe("already_canceled");
+    });
 
-  it("maps policy.horizon_exceeded to policy_rejected", () => {
-    const result = mapFloydError(makeError(409, "policy.horizon_exceeded"));
-    expect(result.code).toBe("policy_rejected");
-    expect(result.recoveryHint).toContain("closer to today");
-  });
-
-  it("maps policy.overnight_not_supported to policy_rejected", () => {
-    const result = mapFloydError(makeError(409, "policy.overnight_not_supported"));
-    expect(result.code).toBe("policy_rejected");
-    expect(result.recoveryHint).toContain("Overnight");
-  });
-
-  it("maps booking.invalid_transition to hold_expired", () => {
-    const result = mapFloydError(makeError(409, "booking.invalid_transition"));
-    expect(result.code).toBe("hold_expired");
+    it("falls back to invalid_transition for unknown status", () => {
+      const result = mapFloydError(makeError(409, "booking.invalid_transition", "Conflict"));
+      expect(result.code).toBe("invalid_transition");
+    });
   });
 
   it("maps 422 to invalid_input", () => {

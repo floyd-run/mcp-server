@@ -30,11 +30,26 @@ export function toLocalTime(utcIso: string, timezone: string): string {
   return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}${offset}`;
 }
 
+/**
+ * Derives the customer appointment times from a buffer-expanded allocation.
+ * Engine stores: allocation.startTime = appointment - bufferBefore,
+ *                allocation.endTime   = appointment + bufferAfter.
+ */
+function appointmentTimes(alloc: FloydAllocation): { startTime: string; endTime: string } {
+  const start = new Date(alloc.startTime).getTime() + alloc.buffer.beforeMs;
+  const end = new Date(alloc.endTime).getTime() - alloc.buffer.afterMs;
+  return {
+    startTime: new Date(start).toISOString(),
+    endTime: new Date(end).toISOString(),
+  };
+}
+
 export function formatBooking(booking: FloydBooking, resource: FloydResource | null): McpBooking {
   const alloc: FloydAllocation | undefined = booking.allocations[0];
   const timezone = resource?.timezone ?? "UTC";
-  const startTime = alloc?.startTime ?? null;
-  const endTime = alloc?.endTime ?? null;
+  const times = alloc ? appointmentTimes(alloc) : null;
+  const startTime = times?.startTime ?? null;
+  const endTime = times?.endTime ?? null;
 
   return {
     bookingId: booking.id,

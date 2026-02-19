@@ -57,11 +57,19 @@ export interface FloydBookingResponse {
   data: FloydBooking;
 }
 
+export interface FloydErrorDetails {
+  code?: string;
+  message?: string;
+  currentStatus?: string;
+  requestedStatus?: string;
+  [key: string]: unknown;
+}
+
 export interface FloydErrorBody {
   error: {
     code: string;
     message: string;
-    details?: unknown;
+    details?: FloydErrorDetails;
   };
 }
 

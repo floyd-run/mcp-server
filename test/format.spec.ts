@@ -54,14 +54,35 @@ describe("formatBooking", () => {
     updatedAt: "2026-01-01T00:00:00Z",
   };
 
-  it("formats booking with resource", () => {
+  it("formats booking with resource (zero buffer)", () => {
     const result = formatBooking(booking, resource);
     expect(result.bookingId).toBe("bkg_01abc");
     expect(result.status).toBe("hold");
     expect(result.resourceName).toBe("Dr. Smith");
     expect(result.timezone).toBe("America/New_York");
+    expect(result.startTime).toBe("2026-03-01T14:00:00.000Z");
+    expect(result.endTime).toBe("2026-03-01T14:30:00.000Z");
     expect(result.startTimeLocal).toContain("2026-03-01T09:00:00");
     expect(result.metadata).toEqual({ customerName: "Jane" });
+  });
+
+  it("reverses buffer offsets to derive appointment times", () => {
+    const bufferedBooking: FloydBooking = {
+      ...booking,
+      allocations: [
+        {
+          id: "alc_01jkl",
+          resourceId: "rsc_01mno",
+          startTime: "2026-03-01T13:45:00.000Z", // appointment 14:00 - 15min buffer
+          endTime: "2026-03-01T14:40:00.000Z", // appointment 14:30 + 10min buffer
+          buffer: { beforeMs: 900_000, afterMs: 600_000 },
+          active: true,
+        },
+      ],
+    };
+    const result = formatBooking(bufferedBooking, resource);
+    expect(result.startTime).toBe("2026-03-01T14:00:00.000Z");
+    expect(result.endTime).toBe("2026-03-01T14:30:00.000Z");
   });
 
   it("formats booking without resource (null)", () => {
