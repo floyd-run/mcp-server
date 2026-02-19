@@ -30,7 +30,7 @@ if (isStdio) {
 } else {
   const app = new Hono();
 
-  app.post("/mcp", async (c) => {
+  app.post("/", async (c) => {
     const transport = new WebStandardStreamableHTTPServerTransport({
       enableJsonResponse: true,
     });
@@ -44,13 +44,13 @@ if (isStdio) {
     );
   });
 
-  app.get("/mcp", (c) => c.body(null, 405));
+  app.get("/", (c) => c.body(null, 405));
 
   app.get("/health", (c) => c.json({ ok: true }));
 
   const httpServer = serve({ fetch: app.fetch, port: config.port }, () => {
     console.error(`[floyd-mcp] Streamable HTTP server listening on port ${config.port}`);
-    console.error(`[floyd-mcp] Endpoint: POST http://localhost:${config.port}/mcp`);
+    console.error(`[floyd-mcp] Endpoint: POST http://localhost:${config.port}/`);
   });
 
   function shutdown() {
