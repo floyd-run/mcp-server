@@ -8,8 +8,8 @@ import * as confirmBooking from "./tools/confirm-booking";
 import * as cancelBooking from "./tools/cancel-booking";
 import * as getBooking from "./tools/get-booking";
 
-function resolveApiKey(extra: { authInfo?: { token?: string } }, fallback: string): string {
-  return extra.authInfo?.token ?? fallback;
+function extractApiKey(extra: { authInfo?: { token?: string } }): string | undefined {
+  return extra.authInfo?.token;
 }
 
 export function createServer(config: Config): McpServer {
@@ -24,16 +24,16 @@ export function createServer(config: Config): McpServer {
     getAvailableSlots.description,
     getAvailableSlots.inputSchema,
     (args, extra) => {
-      const apiKey = resolveApiKey(extra, config.floydApiKey);
+      const apiKey = extractApiKey(extra);
       const client = new FloydClient(config.floydBaseUrl, apiKey);
-      return getAvailableSlots.handler(args, client, apiKey);
+      return getAvailableSlots.handler(args, client, apiKey ?? "");
     },
   );
 
   server.tool(holdBooking.name, holdBooking.description, holdBooking.inputSchema, (args, extra) => {
-    const apiKey = resolveApiKey(extra, config.floydApiKey);
+    const apiKey = extractApiKey(extra);
     const client = new FloydClient(config.floydBaseUrl, apiKey);
-    return holdBooking.handler(args, client, apiKey);
+    return holdBooking.handler(args, client, apiKey ?? "");
   });
 
   server.tool(
@@ -41,7 +41,7 @@ export function createServer(config: Config): McpServer {
     confirmBooking.description,
     confirmBooking.inputSchema,
     (args, extra) => {
-      const apiKey = resolveApiKey(extra, config.floydApiKey);
+      const apiKey = extractApiKey(extra);
       const client = new FloydClient(config.floydBaseUrl, apiKey);
       return confirmBooking.handler(args, client);
     },
@@ -52,14 +52,14 @@ export function createServer(config: Config): McpServer {
     cancelBooking.description,
     cancelBooking.inputSchema,
     (args, extra) => {
-      const apiKey = resolveApiKey(extra, config.floydApiKey);
+      const apiKey = extractApiKey(extra);
       const client = new FloydClient(config.floydBaseUrl, apiKey);
       return cancelBooking.handler(args, client);
     },
   );
 
   server.tool(getBooking.name, getBooking.description, getBooking.inputSchema, (args, extra) => {
-    const apiKey = resolveApiKey(extra, config.floydApiKey);
+    const apiKey = extractApiKey(extra);
     const client = new FloydClient(config.floydBaseUrl, apiKey);
     return getBooking.handler(args, client);
   });

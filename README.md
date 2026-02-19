@@ -24,7 +24,6 @@ pnpm install
 
 | Variable         | Required | Default                    | Description        |
 | ---------------- | -------- | -------------------------- | ------------------ |
-| `FLOYD_API_KEY`  | Yes      | —                          | Floyd API key      |
 | `FLOYD_BASE_URL` | No       | `https://api.floyd.run/v1` | Floyd API base URL |
 | `PORT`           | No       | `3000`                     | HTTP server port   |
 
@@ -47,13 +46,12 @@ pnpm dev -- --stdio
 
 ### Authentication
 
-The server resolves API keys per-request in this order:
+When the Floyd engine requires authentication, connecting agents provide their API key via:
 
-1. `Authorization: Bearer <token>` header
+1. `Authorization: Bearer <token>` header (preferred)
 2. `?token=<value>` query parameter
-3. `FLOYD_API_KEY` environment variable (fallback)
 
-This allows multi-tenant setups where each client sends its own API key.
+The API key is forwarded to the Floyd engine on each request. If the engine has auth disabled (e.g. self-hosted), no key is needed.
 
 ## Booking flow
 
@@ -81,7 +79,7 @@ pnpm build         # bundle with tsup
 
 ```bash
 pnpm build
-FLOYD_API_KEY=floyd_live_xxx node dist/index.js
+pnpm start
 ```
 
 The server handles `SIGTERM`/`SIGINT` for graceful shutdown. HTTP requests to the Floyd API have a 10-second timeout.

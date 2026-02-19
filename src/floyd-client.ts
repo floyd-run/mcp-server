@@ -25,7 +25,7 @@ const DEFAULT_TIMEOUT_MS = 10_000;
 export class FloydClient {
   constructor(
     private readonly baseUrl: string,
-    private readonly apiKey: string,
+    private readonly apiKey?: string,
     private readonly timeoutMs: number = DEFAULT_TIMEOUT_MS,
   ) {}
 
@@ -36,10 +36,10 @@ export class FloydClient {
     headers?: Record<string, string>,
   ): Promise<T> {
     const url = `${this.baseUrl}${path}`;
-    const reqHeaders: Record<string, string> = {
-      Authorization: `Bearer ${this.apiKey}`,
-      ...headers,
-    };
+    const reqHeaders: Record<string, string> = { ...headers };
+    if (this.apiKey) {
+      reqHeaders["Authorization"] = `Bearer ${this.apiKey}`;
+    }
     if (body) {
       reqHeaders["Content-Type"] = "application/json";
     }
