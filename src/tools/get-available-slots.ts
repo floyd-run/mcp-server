@@ -69,7 +69,6 @@ export async function handler(
       const timezone = resource?.timezone ?? entry.timezone;
 
       for (const slot of entry.slots) {
-        if (slot.status !== "available") continue;
         if (slots.length >= args.limit) break;
 
         const slotId = sign(

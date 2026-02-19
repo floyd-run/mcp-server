@@ -35,7 +35,6 @@ export interface FloydResource {
 export interface FloydSlot {
   startTime: string;
   endTime: string;
-  status: "available" | "unavailable";
 }
 
 export interface FloydSlotsResourceEntry {

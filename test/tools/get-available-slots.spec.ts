@@ -16,17 +16,14 @@ function mockClient(overrides: Partial<FloydClient> = {}): FloydClient {
           {
             startTime: "2026-03-01T14:00:00Z",
             endTime: "2026-03-01T14:30:00Z",
-            status: "available",
           },
           {
             startTime: "2026-03-01T15:00:00Z",
             endTime: "2026-03-01T15:30:00Z",
-            status: "available",
           },
           {
             startTime: "2026-03-01T16:00:00Z",
             endTime: "2026-03-01T16:30:00Z",
-            status: "unavailable",
           },
         ],
       },
@@ -73,8 +70,8 @@ describe("floyd_get_available_slots", () => {
     const data = result.structuredContent as Record<string, unknown>;
     const slots = data["slots"] as Array<Record<string, unknown>>;
 
-    // Only 2 available (third is unavailable)
-    expect(slots).toHaveLength(2);
+    // All 3 slots returned (endpoint only returns available slots)
+    expect(slots).toHaveLength(3);
 
     // Verify slotId is signed and verifiable
     const slotId = slots[0]!["slotId"] as string;
