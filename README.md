@@ -4,6 +4,10 @@ MCP server that exposes [Floyd](https://floyd.run) scheduling and booking tools 
 
 For full API documentation, see [docs.floyd.run](https://docs.floyd.run).
 
+<a href="https://glama.ai/mcp/servers/@floyd-run/floyd">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@floyd-run/floyd/badge" alt="Floyd MCP server" />
+</a>
+
 ## Tools
 
 | Tool                        | Description                                             |
