@@ -6,6 +6,8 @@ import * as getAvailableSlots from "./tools/get-available-slots";
 import * as holdBooking from "./tools/hold-booking";
 import * as confirmBooking from "./tools/confirm-booking";
 import * as cancelBooking from "./tools/cancel-booking";
+import * as rescheduleBooking from "./tools/reschedule-booking";
+import * as updateBooking from "./tools/update-booking";
 import * as getBooking from "./tools/get-booking";
 
 function extractApiKey(extra: { authInfo?: { token?: string } }): string | undefined {
@@ -55,6 +57,28 @@ export function createServer(config: Config): McpServer {
       const apiKey = extractApiKey(extra);
       const client = new FloydClient(config.floydBaseUrl, apiKey);
       return cancelBooking.handler(args, client);
+    },
+  );
+
+  server.tool(
+    rescheduleBooking.name,
+    rescheduleBooking.description,
+    rescheduleBooking.inputSchema,
+    (args, extra) => {
+      const apiKey = extractApiKey(extra);
+      const client = new FloydClient(config.floydBaseUrl, apiKey);
+      return rescheduleBooking.handler(args, client);
+    },
+  );
+
+  server.tool(
+    updateBooking.name,
+    updateBooking.description,
+    updateBooking.inputSchema,
+    (args, extra) => {
+      const apiKey = extractApiKey(extra);
+      const client = new FloydClient(config.floydBaseUrl, apiKey);
+      return updateBooking.handler(args, client);
     },
   );
 

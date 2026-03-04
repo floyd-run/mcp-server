@@ -27,7 +27,8 @@ export async function handler(
   try {
     const response = await client.getBooking(args.bookingId);
 
-    const resourceId = response.data.allocations[0]?.resourceId;
+    const alloc = response.data.allocations.find((a) => a.active) ?? response.data.allocations[0];
+    const resourceId = alloc?.resourceId;
     const resource = resourceId
       ? await client
           .getResource(resourceId)
@@ -45,6 +46,7 @@ export async function handler(
         endTime: a.endTime,
         bufferBeforeMs: a.buffer.beforeMs,
         bufferAfterMs: a.buffer.afterMs,
+        active: a.active,
       }));
       return success({ booking, allocations });
     }

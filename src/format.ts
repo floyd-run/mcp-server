@@ -45,7 +45,8 @@ function appointmentTimes(alloc: FloydAllocation): { startTime: string; endTime:
 }
 
 export function formatBooking(booking: FloydBooking, resource: FloydResource | null): McpBooking {
-  const alloc: FloydAllocation | undefined = booking.allocations[0];
+  const alloc: FloydAllocation | undefined =
+    booking.allocations.find((a) => a.active) ?? booking.allocations[0];
   const timezone = resource?.timezone ?? "UTC";
   const times = alloc ? appointmentTimes(alloc) : null;
   const startTime = times?.startTime ?? null;

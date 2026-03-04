@@ -122,6 +122,31 @@ export class FloydClient {
     return this.request("POST", `/bookings/${bookingId}/cancel`, undefined, headers);
   }
 
+  async rescheduleBooking(params: {
+    bookingId: string;
+    startTime: string;
+    endTime: string;
+    idempotencyKey?: string | undefined;
+  }): Promise<FloydBookingResponse> {
+    const headers: Record<string, string> = {};
+    if (params.idempotencyKey) {
+      headers["Idempotency-Key"] = params.idempotencyKey;
+    }
+    return this.request(
+      "POST",
+      `/bookings/${params.bookingId}/reschedule`,
+      { startTime: params.startTime, endTime: params.endTime },
+      headers,
+    );
+  }
+
+  async updateBookingMetadata(
+    bookingId: string,
+    metadata: Record<string, unknown>,
+  ): Promise<FloydBookingResponse> {
+    return this.request("PATCH", `/bookings/${bookingId}`, { metadata });
+  }
+
   async getBooking(bookingId: string): Promise<FloydBookingResponse> {
     return this.request("GET", `/bookings/${bookingId}`);
   }

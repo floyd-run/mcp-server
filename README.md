@@ -12,6 +12,8 @@ For full API documentation, see [docs.floyd.run](https://docs.floyd.run).
 | `floyd_hold_booking`        | Place a temporary hold on a time slot                   |
 | `floyd_confirm_booking`     | Confirm a held booking (requires explicit user consent) |
 | `floyd_cancel_booking`      | Cancel a held or confirmed booking                      |
+| `floyd_reschedule_booking`  | Move a booking to a new time                            |
+| `floyd_update_booking`      | Update a booking's metadata                             |
 | `floyd_get_booking`         | Retrieve booking details and status                     |
 
 ## Setup
@@ -58,12 +60,16 @@ The API key is forwarded to the Floyd engine on each request. If the engine has 
 ```
 get_available_slots → hold_booking → confirm_booking
                                    ↘ cancel_booking
+                                   ↘ reschedule_booking
+                                   ↘ update_booking (metadata)
 ```
 
 1. **Get slots** — query available times, returns signed `slotId` tokens
 2. **Hold** — reserve a slot using the `slotId` (or explicit fields). Creates a booking in `held` state
 3. **Confirm** — finalize the booking. Requires `userConfirmed: true`
 4. **Cancel** — release a held or confirmed booking
+5. **Reschedule** — move a booking to a new time, preserving its identity
+6. **Update** — attach or replace metadata (e.g. party size, special requests)
 
 ## Development
 
