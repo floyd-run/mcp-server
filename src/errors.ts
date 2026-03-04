@@ -53,6 +53,15 @@ export function mapFloydError(err: FloydApiError): McpError {
       };
     }
 
+    // Service configuration errors — not transient, retrying won't help
+    if (apiCode === "service.no_policy" || apiCode === "service.resource_not_member") {
+      return {
+        code: "service_misconfigured",
+        message: err.body?.error.message ?? "The service is not properly configured.",
+        recoveryHint: "The service is not properly configured. Contact the administrator.",
+      };
+    }
+
     // Status transition conflict — differentiate by currentStatus
     if (apiCode === "booking.invalid_transition") {
       const currentStatus = err.body?.error.details?.currentStatus;

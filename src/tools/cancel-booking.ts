@@ -31,7 +31,8 @@ export async function handler(
   try {
     const response = await client.cancelBooking(args.bookingId, args.idempotencyKey);
 
-    const resourceId = response.data.allocations[0]?.resourceId;
+    const alloc = response.data.allocations.find((a) => a.active) ?? response.data.allocations[0];
+    const resourceId = alloc?.resourceId;
     const resource = resourceId
       ? await client
           .getResource(resourceId)
